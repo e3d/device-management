@@ -1,7 +1,7 @@
 <template>
   <div>
     <form @submit.prevent="handleSubmit">
-      <input v-model="deviceDetails.id" placeholder="ID" />
+      <input v-model="deviceDetails.id" @input="handleInput" placeholder="ID" />
       <input v-model="formattedDate" type="date" placeholder="Purchase Date" />
       <input v-model="deviceDetails.manufacturer" placeholder="Manufacturer" />
       <input v-model="deviceDetails.contact" placeholder="Contact" />
@@ -25,13 +25,18 @@ export default {
       default: () => ({})
     }
   },
-  emits: ['add-device'],
+  emits: ['add-device', 'update-device'],
   setup(props, { emit }) {
     debugger
     const { device, updateDevice } = useDevice(props.initialDeviceData);
     const deviceDetails = ref(device);
 
     const formattedDate = formatDateToYYYYMMDD(deviceDetails.value.purchaseDate);
+
+    const handleInput = () => {
+      updateDevice(deviceDetails.value);
+      emit('update-device', deviceDetails.value);
+    };
 
     const handleSubmit = () => {
       updateDevice(deviceDetails.value);
@@ -40,7 +45,7 @@ export default {
       // For example, emit an event or call an API
     };
 
-    return { deviceDetails, handleSubmit, formattedDate };
+    return { deviceDetails, handleInput, handleSubmit, formattedDate };
   }
 }
 
