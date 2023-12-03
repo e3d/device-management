@@ -1,13 +1,13 @@
 <template>
   <div>
-    <device-form @add-device="addDevice" @update-device="updateDevice" />
+    <button @click="addNewDevice">Add New Device</button>
+
     <p>list below.</p>
     <Draggable v-model="devices" tag="ul" item-key="id">
       <template #item="{element, index}">
-        <li :key="element.id">
-          {{ element.id }} - {{ element.purchaseDate }} - {{ element.manufacturer }}
-          <button @click="deleteDevice(element.id)">Delete</button>
-        </li>
+        <device-form 
+            v-for="(device, index) in devices" :key="device.id"
+          @update-device="updateDevice" />
       </template>
     </Draggable>
   </div>
@@ -23,6 +23,17 @@ export default {
   setup() {
     const { devices, addDevice, deleteDevice } = useDeviceManagement();
 
+    const newDeviceTemplate = () => ({
+      id: '',
+      purchaseDate: new Date().toISOString().substring(0, 10),
+      manufacturer: '',
+      // ... initialize other properties as needed
+    });
+
+    const addNewDevice = () => {
+      devices.value.push(newDeviceTemplate());
+    };
+
     const updateDevice = (updatedDevice) => {
       const index = devices.value.findIndex(d => d.id === updatedDevice.id);
       if (index !== -1) {
@@ -30,7 +41,7 @@ export default {
       }
     };
     
-    return { devices, addDevice, deleteDevice, updateDevice };
+    return { devices, addDevice, deleteDevice, addNewDevice, updateDevice };
  
   }
 }

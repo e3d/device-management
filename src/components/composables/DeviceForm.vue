@@ -1,14 +1,14 @@
 <template>
   <div>
     <form @submit.prevent="handleSubmit">
-      <input v-model="deviceDetails.id" @input="handleInput" placeholder="ID" />
-      <input v-model="formattedDate" type="date" placeholder="Purchase Date" />
-      <input v-model="deviceDetails.manufacturer" placeholder="Manufacturer" />
-      <input v-model="deviceDetails.contact" placeholder="Contact" />
-      <input v-model="deviceDetails.model" placeholder="Model" />
-      <input v-model="deviceDetails.components" placeholder="Components" />
-      <input v-model="deviceDetails.department" placeholder="Department" />
-      <input v-model="deviceDetails.manager" placeholder="Manager" />
+      <input v-model="localDevice.id" @input="emitUpdate" placeholder="ID" />
+      <input v-model="formattedDate" @input="emitUpdate" type="date" placeholder="Purchase Date" />
+      <input v-model="localDevice.manufacturer" @input="emitUpdate" placeholder="Manufacturer" />
+      <input v-model="localDevice.contact" @input="emitUpdate" placeholder="Contact" />
+      <input v-model="localDevice.model" @input="emitUpdate" placeholder="Model" />
+      <input v-model="localDevice.components" @input="emitUpdate" placeholder="Components" />
+      <input v-model="localDevice.department" @input="emitUpdate" placeholder="Department" />
+      <input v-model="localDevice.manager" @input="emitUpdate" placeholder="Manager" />
       <button type="submit">Submit</button>
     </form>
   </div>
@@ -16,36 +16,39 @@
 
 <script>
 import { useDevice } from '../../composables/useDevice.js';
-import { ref } from 'vue';
+import { ref, watch, watchEffect } from 'vue';
 
 export default {
   props: {
     initialDeviceData: {
       type: Object,
-      default: () => ({})
+      default: () => ({}),
+      required: true
     }
   },
-  emits: ['add-device', 'update-device'],
+  emits: ['update-device'],
   setup(props, { emit }) {
     debugger
-    const { device, updateDevice } = useDevice(props.initialDeviceData);
-    const deviceDetails = ref(device);
+    const localDevice = ref({ ...props.device });
 
-    const formattedDate = formatDateToYYYYMMDD(deviceDetails.value.purchaseDate);
+    watchEffect(() => {
+      Object.assign(localDevice.value, props.device);
+    });
 
-    const handleInput = () => {
-      updateDevice(deviceDetails.value);
-      emit('update-device', deviceDetails.value);
+    const emitUpdate = () => {
+      emit('update-device', localDevice.value);
     };
 
+    const formattedDate = formatDateToYYYYMMDD(localDevice.value.purchaseDate);
+    
     const handleSubmit = () => {
-      updateDevice(deviceDetails.value);
-      emit('add-device', deviceDetails.value); 
+      updateDevice(localDevice.value);
+      emit('add-device', localDevice.value); 
       // Additional logic to handle form submission
       // For example, emit an event or call an API
     };
 
-    return { deviceDetails, handleInput, handleSubmit, formattedDate };
+    return { localDevice, emitUpdate, handleSubmit, formattedDate };
   }
 }
 
