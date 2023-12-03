@@ -5,9 +5,9 @@
     <p>list below.</p>
     <Draggable v-model="devices" tag="ul" item-key="id">
       <template #item="{element, index}">
-        <device-form 
-            v-for="(device, index) in devices" :key="device.id"
-          @update-device="updateDevice" />
+        <li>
+          <device-form :device="element" @update-device="updateDevice(index, $event)" />
+        </li>
       </template>
     </Draggable>
   </div>
@@ -34,11 +34,8 @@ export default {
       devices.value.push(newDeviceTemplate());
     };
 
-    const updateDevice = (updatedDevice) => {
-      const index = devices.value.findIndex(d => d.id === updatedDevice.id);
-      if (index !== -1) {
-        devices.value[index] = updatedDevice;
-      }
+    const updateDevice = (index, updatedDevice) => {
+      devices.value[index] = updatedDevice;
     };
     
     return { devices, addDevice, deleteDevice, addNewDevice, updateDevice };
